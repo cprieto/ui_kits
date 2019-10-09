@@ -1,6 +1,8 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const webpack = require('webpack')
+const TerserPlugin = require('terser-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 var config = {
   entry: path.resolve('./src/index.tsx'),
@@ -10,10 +12,6 @@ var config = {
   },
   module: {
     rules: [
-      {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"]
-      },
       {
         test: /\.tsx?$/,
         use: "ts-loader",
@@ -42,6 +40,10 @@ var config = {
 module.exports = (env, argv) => {
   if (argv.mode === 'development') {
     config.devtool = 'source-map'
+    config.module.rules.push({
+      test: /\.css$/,
+      use: ["style-loader", "css-loader"]
+    })
   }
 
   if (argv.mode === 'production') {
@@ -50,6 +52,24 @@ module.exports = (env, argv) => {
         new TerserPlugin()
       ]
     }
+    config.module.rules.push({
+      test: /\.css$/,
+      use: [ {
+        loader: MiniCssExtractPlugin.loader,
+        options: {
+          // you can specify a publicPath here
+          // by default it uses publicPath in webpackOptions.output
+          publicPath: '../',
+          hmr: process.env.NODE_ENV === 'development',
+        },
+      },
+      'css-loader', ]
+    })
+    config.plugins.push(new MiniCssExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css",
+      ignoreOrder: false
+    }))
   }
 
   config.plugins.push(new webpack.DefinePlugin({
@@ -57,8 +77,6 @@ module.exports = (env, argv) => {
       ? JSON.stringify(null) 
       : JSON.stringify('http://localhost:8080/api')
   }))
-
-  // TODO: We can move the CSS extractor to this line
 
   return config
 }

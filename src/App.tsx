@@ -8,7 +8,7 @@ const App = () => (
   <Router>
     <Navbar appearance="inverse">
       <Navbar.Header>
-        <a href="#" className="navbar-brand logo">Kronbute</a>
+        <a className="navbar-brand logo">Kronbute</a>
       </Navbar.Header>
       <Navbar.Body>
         <Nav>
